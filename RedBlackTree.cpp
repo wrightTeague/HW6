@@ -9,7 +9,7 @@ RedBlackTree::RedBlackTree() {
 }
 
 RedBlackTree::RedBlackTree(int n) {
-    // TODO
+    Insert(n);
 }
 
 RedBlackTree::RedBlackTree(const RedBlackTree& rbt1) {
@@ -47,29 +47,45 @@ size_t RedBlackTree::Size() {
     return 0;
 }
 
-string RedBlackTree::ToInfixString(RBTNode* root) const {
-    if (root == nullptr) {
+string RedBlackTree::ToInfixString(RBTNode* node) const {
+    if (node == nullptr) {
         return "";
     }
-    return NodeToString(root);
+    return ToInfixString(node->left_child) + NodeToString(node) + ToInfixString(node->right_child);
 }
 
-string RedBlackTree::ToPrefixString(RBTNode* root) const {
-    // TODO
-    return "";
+string RedBlackTree::ToPrefixString(RBTNode* node) const {
+    if (node == nullptr) {
+        return "";
+    }
+    return NodeToString(node) + ToPrefixString(node->left_child) + ToPrefixString(node->right_child);
 }
 
-string RedBlackTree::ToPostfixString(RBTNode* root) const {
-    // TODO
-    return "";
+string RedBlackTree::ToPostfixString(RBTNode* node) const {
+    if (node == nullptr) {
+        return "";
+    }
+    return ToPostfixString(node->left_child) + ToPostfixString(node->right_child) + NodeToString(node);
 }
 
 string RedBlackTree::NodeToString(RBTNode* node) const {
     string color;
-    if (node->color == 0) {
+    if (node->color == COLOR_BLACK) {
         color = "B";
     } else {
         color = "R";
     }
     return " " + color + to_string(node->value) + " ";
+}
+
+bool RedBlackTree::HasLeftChild(RBTNode* node) const {
+    return node->left_child != nullptr;
+}
+
+bool RedBlackTree::HasRightChild(RBTNode* node) const {
+    return node->right_child != nullptr;
+}
+
+bool RedBlackTree::HasParent(RBTNode* node) const {
+    return node->parent != nullptr;
 }

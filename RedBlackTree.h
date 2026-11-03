@@ -4,8 +4,11 @@
 #include <string>
 using namespace std;
 
+#define COLOR_BLACK 0
+#define COLOR_RED 1
+
 struct RBTNode {
-    int color = 0; // black by default
+    int color = COLOR_BLACK;
     int value;
     RBTNode* parent = nullptr;
     RBTNode* left_child = nullptr;
@@ -35,9 +38,12 @@ class RedBlackTree {
     private:
     unsigned long long int numItems = 0;
     RBTNode *root = nullptr;
-    string ToInfixString(RBTNode* root) const;
-    string ToPrefixString(RBTNode* root) const;
-    string ToPostfixString(RBTNode* root) const;
+    string ToInfixString(RBTNode* node) const;
+    string ToPrefixString(RBTNode* node) const;
+    string ToPostfixString(RBTNode* node) const;
     string NodeToString(RBTNode*) const;
+    bool HasLeftChild(RBTNode* node) const;
+    bool HasRightChild(RBTNode* node) const;
+    bool HasParent(RBTNode* node) const;
 };
 #endif
