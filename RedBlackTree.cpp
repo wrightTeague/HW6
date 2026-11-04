@@ -1,4 +1,5 @@
 #include <string>
+#include <stdexcept>
 #include "RedBlackTree.h"
 
 using namespace std;
@@ -21,10 +22,16 @@ RedBlackTree::~RedBlackTree() {
 }
 
 void RedBlackTree::Insert(int n) {
-    RBTNode *temp = new RBTNode();
-    temp->value = n;
-    root = temp;
-    numItems++;
+    if (root == nullptr) {
+        RBTNode *temp = new RBTNode();
+        temp->value = n;
+        root = temp;
+        numItems++;
+    } else {
+        Insert(n, root);
+    }
+
+
 }
 
 bool RedBlackTree::Contains(int n) {
@@ -88,4 +95,34 @@ bool RedBlackTree::HasRightChild(RBTNode* node) const {
 
 bool RedBlackTree::HasParent(RBTNode* node) const {
     return node->parent != nullptr;
+}
+
+void RedBlackTree::Insert(int n, RBTNode* node) {
+    if (n == node->value) {
+        throw invalid_argument("Value: " + to_string(n) + " already exists inside the tree.");
+    }
+    if (n < node->value) {
+        if (HasLeftChild(node)) {
+            Insert(n, node->left_child);
+        } else {
+            RBTNode* temp = new RBTNode();
+            temp->color = COLOR_RED;
+            temp->value = n;
+            temp->parent = node;
+            node->left_child = temp;
+            numItems++;
+        }
+    } else {
+        if (HasRightChild(node)) {
+            Insert(n, node->right_child);
+        } else {
+            RBTNode* temp = new RBTNode();
+            temp->color = COLOR_RED;
+            temp->value = n;
+            temp->parent = node;
+            node->right_child = temp;
+            numItems++;
+
+        }
+    }
 }

@@ -45,5 +45,6 @@ class RedBlackTree {
     bool HasLeftChild(RBTNode* node) const;
     bool HasRightChild(RBTNode* node) const;
     bool HasParent(RBTNode* node) const;
+    void Insert(int n, RBTNode* node);
 };
 #endif
