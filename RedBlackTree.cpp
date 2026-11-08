@@ -35,23 +35,46 @@ void RedBlackTree::Insert(int n) {
 }
 
 bool RedBlackTree::Contains(int n) {
-    // TODO
+    RBTNode* current = root;
+    while (current != nullptr) {
+        if (n == current->value) {
+            return true;
+        }
+        if (n < current->value) {
+            current = current->left_child;
+        } else {
+            current = current->right_child;
+        }
+    }
     return false;
 }
 
 int RedBlackTree::GetMin() {
-    // TODO
-    return 0;
+    // No value would be a correct answer here, and returning 0 would look
+    // like a real minimum.
+    if (root == nullptr) {
+        throw invalid_argument("GetMin() called on an empty tree.");
+    }
+    RBTNode* current = root;
+    while (HasLeftChild(current)) {
+        current = current->left_child;
+    }
+    return current->value;
 }
 
 int RedBlackTree::GetMax() {
-    // TODO
-    return 0;
+    if (root == nullptr) {
+        throw invalid_argument("GetMax() called on an empty tree.");
+    }
+    RBTNode* current = root;
+    while (HasRightChild(current)) {
+        current = current->right_child;
+    }
+    return current->value;
 }
 
 size_t RedBlackTree::Size() {
-    // TODO
-    return 0;
+    return numItems;
 }
 
 string RedBlackTree::ToInfixString(RBTNode* node) const {

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <cassert>
 #include <random>
+#include <stdexcept>
 #include "RedBlackTree.h"
 
 using namespace std;
@@ -218,10 +219,20 @@ void TestContains(){
 	rbt->Insert(34);
 	
 	assert(rbt->Contains(34));
+	assert(rbt->Contains(40));
+	assert(rbt->Contains(12));
+	assert(rbt->Contains(29));
+	assert(rbt->Contains(55));
+	assert(rbt->Contains(30) == false);
+	assert(rbt->Contains(0) == false);
+	assert(rbt->Contains(100) == false);
 	delete rbt;
 
-	
-	cout << "TESTS MISSING" << endl << endl;
+	rbt = new RedBlackTree(7);
+	assert(rbt->Contains(7));
+	assert(rbt->Contains(8) == false);
+	delete rbt;
+
 	cout << "PASSED!" << endl << endl;
 }
 
@@ -231,7 +242,61 @@ void TestContains(){
 void TestGetMinimumMaximum(){
 	cout << "Testing Get Minimum and Get Maximum..." << endl;
 
-	cout << "TESTS MISSING" << endl << endl;
+	RedBlackTree empty = RedBlackTree();
+	try {
+		empty.GetMin();
+		assert(false);
+	} catch (const invalid_argument& e) {}
+	try {
+		empty.GetMax();
+		assert(false);
+	} catch (const invalid_argument& e) {}
+
+	RedBlackTree single = RedBlackTree(5);
+	assert(single.GetMin() == 5);
+	assert(single.GetMax() == 5);
+
+	// After balancing, 5 ends up two levels below the root, not a direct child.
+	RedBlackTree rbt = RedBlackTree();
+	rbt.Insert(12);
+	rbt.Insert(11);
+	rbt.Insert(15);
+	rbt.Insert(5);
+	rbt.Insert(13);
+	rbt.Insert(7);
+	assert(rbt.GetMin() == 5);
+	assert(rbt.GetMax() == 15);
+
+	RedBlackTree negatives = RedBlackTree();
+	negatives.Insert(-3);
+	negatives.Insert(-10);
+	negatives.Insert(4);
+	assert(negatives.GetMin() == -10);
+	assert(negatives.GetMax() == 4);
+
+	cout << "PASSED!" << endl << endl;
+}
+
+void TestSize(){
+	cout << "Testing Size..." << endl;
+
+	RedBlackTree rbt = RedBlackTree();
+	assert(rbt.Size() == 0);
+	rbt.Insert(10);
+	assert(rbt.Size() == 1);
+	rbt.Insert(20);
+	rbt.Insert(30);
+	rbt.Insert(5);
+	assert(rbt.Size() == 4);
+
+	// A rejected duplicate must not be counted.
+	try {
+		rbt.Insert(20);
+		assert(false);
+	} catch (const invalid_argument& e) {}
+	assert(rbt.Size() == 4);
+
+	assert(RedBlackTree(3).Size() == 1);
 
 	cout << "PASSED!" << endl << endl;
 }
@@ -259,6 +324,7 @@ int main(){
 
 	TestContains();
 	TestGetMinimumMaximum();
+	TestSize();
 
 	
 	cout << "ALL TESTS PASSED!!" << endl;
