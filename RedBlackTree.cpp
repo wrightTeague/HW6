@@ -3,7 +3,6 @@
  * Teague Wright, CS 222 HW6 Part 1
  *
  * Sources:
- *   - Insert fix-up cases follow video lecture TODO @ TODO
  *   - Claude (Anthropic, via Claude Code) reviewed my code throughout and wrote
  *     InsertFixUp, RotateLeft/RotateRight, Contains, GetMin, GetMax, Size, the
  *     copy constructor, destructor, operator=, BlackHeight, and PrivateTests.

@@ -36,8 +36,6 @@ Colors are stored as integers using `#define COLOR_BLACK 0` and
 
 ## Sources
 
-- Course video lecture on red-black trees (cited by timecode in
-  `RedBlackTree.cpp`)
 - Claude (Anthropic, via Claude Code) reviewed my code throughout and wrote
   the insert fix-up, rotations, the remaining tree methods, and many of the
   added tests. Each file's header lists exactly what.
