@@ -1,3 +1,14 @@
+/*
+ * RedBlackTree.cpp
+ * Teague Wright, CS 222 HW6 Part 1
+ *
+ * Sources:
+ *   - Insert fix-up cases follow video lecture TODO @ TODO
+ *   - Claude (Anthropic, via Claude Code) reviewed my code throughout and wrote
+ *     InsertFixUp, RotateLeft/RotateRight, Contains, GetMin, GetMax, Size, the
+ *     copy constructor, destructor, operator=, BlackHeight, and PrivateTests.
+ */
+
 #include <iostream>
 #include <cassert>
 #include <string>
@@ -8,7 +19,6 @@ using namespace std;
 
 RedBlackTree::RedBlackTree() {
     root = nullptr;
-
 }
 
 RedBlackTree::RedBlackTree(int n) {
@@ -46,8 +56,6 @@ void RedBlackTree::Insert(int n) {
     } else {
         Insert(n, root);
     }
-
-
 }
 
 bool RedBlackTree::Contains(int n) {

@@ -1,3 +1,12 @@
+/*
+ * RedBlackTree.h
+ * Teague Wright, CS 222 HW6 Part 1
+ *
+ * RBTNode lives here, above the class, because both the class and its
+ * private helpers pass RBTNode pointers around, so it has to be declared
+ * before them.
+ */
+
 #ifndef REDBLACKTREE_H
 #define REDBLACKTREE_H
 

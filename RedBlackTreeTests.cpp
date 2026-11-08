@@ -1,3 +1,10 @@
+/*
+ * Provided tests for HW6, with additions by Teague Wright.
+ * Claude (Anthropic, via Claude Code) helped write the added tests: the
+ * symmetric third-node cases, fourth node, the second fifth-node case, copy
+ * and assignment checks, Contains, GetMin/GetMax, Size, duplicates, the large
+ * tree, and the call to PrivateTests.
+ */
 
 #include <iostream>
 #include <cassert>
