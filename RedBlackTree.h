@@ -23,6 +23,7 @@ class RedBlackTree {
     RedBlackTree(int n);
     RedBlackTree(const RedBlackTree& rbt1);
     ~RedBlackTree();
+    RedBlackTree& operator=(const RedBlackTree& rbt1);
 
     string ToInfixString() const {return ToInfixString(root);};
     string ToPrefixString() const { return ToPrefixString(root);};
@@ -49,5 +50,7 @@ class RedBlackTree {
     void InsertFixUp(RBTNode* node);
     void RotateLeft(RBTNode* node);
     void RotateRight(RBTNode* node);
+    RBTNode* CopySubtree(RBTNode* node, RBTNode* parent);
+    void DeleteSubtree(RBTNode* node);
 };
 #endif

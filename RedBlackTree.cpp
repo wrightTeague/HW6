@@ -13,12 +13,26 @@ RedBlackTree::RedBlackTree(int n) {
     Insert(n);
 }
 
+// Copying node by node instead of re-inserting the values keeps the colors and
+// shape identical. Re-inserting in a different order could balance differently.
 RedBlackTree::RedBlackTree(const RedBlackTree& rbt1) {
-    // TODO
+    root = CopySubtree(rbt1.root, nullptr);
+    numItems = rbt1.numItems;
 }
 
 RedBlackTree::~RedBlackTree() {
-    // TODO
+    DeleteSubtree(root);
+}
+
+// Without this, a = b would copy b's root pointer, and both destructors would
+// delete the same nodes.
+RedBlackTree& RedBlackTree::operator=(const RedBlackTree& rbt1) {
+    if (this != &rbt1) {
+        DeleteSubtree(root);
+        root = CopySubtree(rbt1.root, nullptr);
+        numItems = rbt1.numItems;
+    }
+    return *this;
 }
 
 void RedBlackTree::Insert(int n) {
@@ -250,4 +264,29 @@ void RedBlackTree::RotateRight(RBTNode* node) {
 
     child->right_child = node;
     node->parent = child;
+}
+// Returns a new copy of node and everything below it. parent is passed in
+// because the copy needs to point up to the new tree, not the original.
+RBTNode* RedBlackTree::CopySubtree(RBTNode* node, RBTNode* parent) {
+    if (node == nullptr) {
+        return nullptr;
+    }
+    RBTNode* copy = new RBTNode();
+    copy->value = node->value;
+    copy->color = node->color;
+    copy->parent = parent;
+    copy->left_child = CopySubtree(node->left_child, copy);
+    copy->right_child = CopySubtree(node->right_child, copy);
+    return copy;
+}
+
+// Postfix order: both children have to be deleted before the node holding
+// the only pointers to them.
+void RedBlackTree::DeleteSubtree(RBTNode* node) {
+    if (node == nullptr) {
+        return;
+    }
+    DeleteSubtree(node->left_child);
+    DeleteSubtree(node->right_child);
+    delete node;
 }
