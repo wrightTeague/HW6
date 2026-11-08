@@ -1,3 +1,5 @@
+#include <iostream>
+#include <cassert>
 #include <string>
 #include <stdexcept>
 #include "RedBlackTree.h"
@@ -184,12 +186,14 @@ void RedBlackTree::InsertFixUp(RBTNode* node) {
                 node = grandparent;
             } else {
                 if (node == parent->right_child) {
-                    // LR case: rotate it into the LL shape first.
+                    // Zig-zag: node is a right child of a left child, which the
+                    // provided tests call "Right Left". Rotating the parent
+                    // straightens it into the Left Left shape below.
                     node = parent;
                     RotateLeft(node);
                     parent = node->parent;
                 }
-                // LL case
+                // Left Left
                 parent->color = COLOR_BLACK;
                 grandparent->color = COLOR_RED;
                 RotateRight(grandparent);
@@ -204,12 +208,12 @@ void RedBlackTree::InsertFixUp(RBTNode* node) {
                 node = grandparent;
             } else {
                 if (node == parent->left_child) {
-                    // RL case
+                    // "Left Right" (node is a left child of a right child)
                     node = parent;
                     RotateRight(node);
                     parent = node->parent;
                 }
-                // RR case
+                // Right Right
                 parent->color = COLOR_BLACK;
                 grandparent->color = COLOR_RED;
                 RotateLeft(grandparent);
@@ -289,4 +293,137 @@ void RedBlackTree::DeleteSubtree(RBTNode* node) {
     DeleteSubtree(node->left_child);
     DeleteSubtree(node->right_child);
     delete node;
+}
+
+// Returns the black-height of node's subtree, or -1 if anything below it
+// breaks a red-black rule. Only used by the tests, to check that the tree is
+// still valid after many inserts.
+int RedBlackTree::BlackHeight(RBTNode* node) const {
+    if (node == nullptr) {
+        // Empty leaves count as black.
+        return 1;
+    }
+    if (node->color == COLOR_RED) {
+        if ((HasLeftChild(node) && node->left_child->color == COLOR_RED) ||
+            (HasRightChild(node) && node->right_child->color == COLOR_RED)) {
+            return -1;
+        }
+    }
+    if ((HasLeftChild(node) && node->left_child->parent != node) ||
+        (HasRightChild(node) && node->right_child->parent != node)) {
+        return -1;
+    }
+
+    int left = BlackHeight(node->left_child);
+    int right = BlackHeight(node->right_child);
+    if (left == -1 || right == -1 || left != right) {
+        return -1;
+    }
+    if (node->color == COLOR_BLACK) {
+        return left + 1;
+    }
+    return left;
+}
+
+// Lives inside the class so it can reach the private helpers. Each test
+// builds its own tree, since rotating by hand can leave a tree that breaks
+// the red-black rules.
+void RedBlackTree::PrivateTests() {
+    cout << "Testing Private Methods..." << endl;
+
+    RBTNode black;
+    black.value = 8;
+    RBTNode red;
+    red.value = 42;
+    red.color = COLOR_RED;
+    assert(NodeToString(&black) == " B8 ");
+    assert(NodeToString(&red) == " R42 ");
+
+    RedBlackTree rbt = RedBlackTree();
+    rbt.Insert(10);
+    rbt.Insert(5);
+    rbt.Insert(15);
+    rbt.Insert(3);
+    rbt.Insert(7);
+    assert(rbt.ToPrefixString() == " B10  B5  R3  R7  B15 ");
+
+    assert(rbt.HasLeftChild(rbt.root));
+    assert(rbt.HasRightChild(rbt.root));
+    assert(!rbt.HasParent(rbt.root));
+    RBTNode* fifteen = rbt.root->right_child;
+    assert(rbt.HasParent(fifteen));
+    assert(!rbt.HasLeftChild(fifteen));
+    assert(!rbt.HasRightChild(fifteen));
+    assert(rbt.BlackHeight(rbt.root) == 3);
+
+    // 5 moves up to the root and 7 switches from 5's right to 10's left.
+    rbt.RotateRight(rbt.root);
+    assert(rbt.ToPrefixString() == " B5  R3  B10  R7  B15 ");
+    assert(rbt.root->value == 5);
+    assert(rbt.root->parent == nullptr);
+    RBTNode* ten = rbt.root->right_child;
+    assert(ten->parent == rbt.root);
+    assert(ten->left_child->value == 7);
+    assert(ten->left_child->parent == ten);
+    // Rotating changes the shape without recoloring, so the rules break.
+    assert(rbt.BlackHeight(rbt.root) == -1);
+
+    rbt.RotateLeft(rbt.root);
+    assert(rbt.ToPrefixString() == " B10  B5  R3  R7  B15 ");
+    assert(rbt.root->value == 10);
+    assert(rbt.root->parent == nullptr);
+    assert(rbt.root->left_child->right_child->parent == rbt.root->left_child);
+    assert(rbt.BlackHeight(rbt.root) == 3);
+
+    // Rotating below the root has to relink the parent instead of root.
+    RBTNode* five = rbt.root->left_child;
+    rbt.RotateLeft(five);
+    assert(rbt.root->value == 10);
+    assert(rbt.root->left_child->value == 7);
+    assert(rbt.root->left_child->parent == rbt.root);
+    assert(rbt.ToPrefixString() == " B10  R7  B5  R3  B15 ");
+
+    RBTNode* copy = CopySubtree(rbt.root, nullptr);
+    assert(copy != rbt.root);
+    assert(copy->parent == nullptr);
+    assert(copy->left_child->parent == copy);
+    assert(copy->left_child->left_child->parent == copy->left_child);
+    assert(ToPrefixString(copy) == rbt.ToPrefixString());
+    DeleteSubtree(copy);
+
+    // A red root with a red child, and two sides with different black counts.
+    RBTNode a;
+    a.value = 2;
+    a.color = COLOR_RED;
+    RBTNode b;
+    b.value = 1;
+    b.color = COLOR_RED;
+    b.parent = &a;
+    a.left_child = &b;
+    assert(BlackHeight(&a) == -1);
+    b.color = COLOR_BLACK;
+    assert(BlackHeight(&a) == -1);
+    assert(BlackHeight(nullptr) == 1);
+
+    RedBlackTree big = RedBlackTree();
+    for (int i = 1; i <= 1000; i++) {
+        big.Insert(i);
+        assert(big.BlackHeight(big.root) != -1);
+    }
+    big = RedBlackTree();
+    for (int i = 1000; i >= 1; i--) {
+        big.Insert(i);
+    }
+    assert(big.BlackHeight(big.root) != -1);
+    // A shuffled order hits all four rotation cases many times.
+    for (int i = 0; i < 1000; i++) {
+        int value = (i * 7919) % 1009 + 2000;
+        if (!big.Contains(value)) {
+            big.Insert(value);
+        }
+    }
+    assert(big.BlackHeight(big.root) != -1);
+    assert(big.root->color == COLOR_BLACK);
+
+    cout << "PASSED!" << endl << endl;
 }

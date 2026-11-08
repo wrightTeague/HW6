@@ -77,18 +77,69 @@ void TestInsertThirdNode(){
 	assert(rbt->ToPrefixString() == " B30  R15  R45 ");
 	delete rbt;
 	
-	// more tests go here
-	// consider some symmetry!
-	
-	cout << "TESTS MISSING" << endl << endl;
+	// Mirror images of the three cases above.
+	rbt = new RedBlackTree();
+	rbt->Insert(30);
+	rbt->Insert(45);
+	rbt->Insert(60); // Right Right
+	assert(rbt->ToPrefixString() == " B45  R30  R60 ");
+	delete rbt;
+
+	rbt = new RedBlackTree();
+	rbt->Insert(30);
+	rbt->Insert(45);
+	rbt->Insert(35); // Left Right
+	assert(rbt->ToPrefixString() == " B35  R30  R45 ");
+	delete rbt;
+
+	rbt = new RedBlackTree();
+	rbt->Insert(30);
+	rbt->Insert(45);
+	rbt->Insert(15); // Easy case
+	assert(rbt->ToPrefixString() == " B30  R15  R45 ");
+	delete rbt;
+
 	cout << "PASSED!" << endl << endl;
 }
 
 void TestInsertFourthNode(){
 	cout << "Testing Insert Fourth Node..." << endl;
 
-	cout << "TESTS MISSING" << endl << endl;
-	
+	// The fourth node always lands under a red parent with a red uncle, so the
+	// fix-up only recolors and the root stays the same.
+	RedBlackTree *rbt = new RedBlackTree();
+	rbt->Insert(30);
+	rbt->Insert(15);
+	rbt->Insert(45);
+	rbt->Insert(10);
+	assert(rbt->ToPrefixString() == " B30  B15  R10  B45 ");
+	delete rbt;
+
+	rbt = new RedBlackTree();
+	rbt->Insert(30);
+	rbt->Insert(15);
+	rbt->Insert(45);
+	rbt->Insert(20);
+	assert(rbt->ToPrefixString() == " B30  B15  R20  B45 ");
+	delete rbt;
+
+	rbt = new RedBlackTree();
+	rbt->Insert(30);
+	rbt->Insert(15);
+	rbt->Insert(45);
+	rbt->Insert(50);
+	assert(rbt->ToPrefixString() == " B30  B15  B45  R50 ");
+	delete rbt;
+
+	// Starts from the LL case, so 15 is the root before the fourth insert.
+	rbt = new RedBlackTree();
+	rbt->Insert(30);
+	rbt->Insert(15);
+	rbt->Insert(10);
+	rbt->Insert(5);
+	assert(rbt->ToPrefixString() == " B15  B10  R5  B30 ");
+	delete rbt;
+
 	cout << "PASSED!" << endl << endl;
 }
 
@@ -103,8 +154,16 @@ void TestInsertFifthNode(){
 	//cout << "result: "  << rbt->ToPrefixString() << endl;
 	assert(rbt->ToPrefixString() == " B30  B15  R10  R25  B45 ");
 	delete rbt;
-	
-	cout << "TESTS MISSING" << endl << endl;
+
+	// Black uncle (an empty spot) this time, so it rotates instead of recoloring.
+	rbt = new RedBlackTree();
+	rbt->Insert(30);
+	rbt->Insert(15);
+	rbt->Insert(45);
+	rbt->Insert(10);
+	rbt->Insert(5);
+	assert(rbt->ToPrefixString() == " B30  B10  R5  R15  B45 ");
+	delete rbt;
 	
 	cout << "PASSED!" << endl << endl;
 }
@@ -191,6 +250,34 @@ void TestCopyConstructor(){
 
 	rbt1.Insert(200);
 	assert(rbt2.ToPrefixString() != rbt1.ToPrefixString());
+	assert(rbt2.ToPrefixString() == " B11  B9  R4  B31  R23  R52 ");
+	assert(rbt2.Size() == 6);
+	assert(rbt1.Size() == 7);
+	assert(rbt2.Contains(200) == false);
+
+	// Changes to the copy must not reach the original either.
+	rbt2.Insert(1);
+	assert(rbt1.Contains(1) == false);
+
+	RedBlackTree empty = RedBlackTree();
+	RedBlackTree emptyCopy = RedBlackTree(empty);
+	assert(emptyCopy.ToPrefixString() == "");
+	assert(emptyCopy.Size() == 0);
+	emptyCopy.Insert(5);
+	assert(empty.Size() == 0);
+
+	// Assignment replaces the old nodes instead of sharing them.
+	RedBlackTree assigned = RedBlackTree(99);
+	assigned = rbt1;
+	assert(assigned.ToPrefixString() == rbt1.ToPrefixString());
+	assert(assigned.Contains(99) == false);
+	rbt1.Insert(300);
+	assert(assigned.Contains(300) == false);
+	// Going through a reference so the compiler doesn't flag the self-assignment.
+	RedBlackTree& same = assigned;
+	assigned = same;
+	assert(assigned.Size() == 7);
+	assert(assigned.Contains(200));
 
 	cout << "PASSED!" << endl << endl;
 }
@@ -277,6 +364,64 @@ void TestGetMinimumMaximum(){
 	cout << "PASSED!" << endl << endl;
 }
 
+void TestDuplicateInsert(){
+	cout << "Testing Duplicate Insert..." << endl;
+
+	RedBlackTree rbt = RedBlackTree();
+	rbt.Insert(10);
+	rbt.Insert(5);
+	rbt.Insert(15);
+	string before = rbt.ToPrefixString();
+
+	try {
+		rbt.Insert(10);
+		assert(false);
+	} catch (const invalid_argument& e) {}
+	// A duplicate deeper than the root is caught too, not just at the root.
+	try {
+		rbt.Insert(15);
+		assert(false);
+	} catch (const invalid_argument& e) {}
+	assert(rbt.ToPrefixString() == before);
+
+	try {
+		RedBlackTree single = RedBlackTree(4);
+		single.Insert(4);
+		assert(false);
+	} catch (const invalid_argument& e) {}
+
+	cout << "PASSED!" << endl << endl;
+}
+
+void TestLargeTree(){
+	cout << "Testing Large Tree..." << endl;
+
+	// Sorted input is the worst case for a plain BST (it becomes a linked
+	// list), so it's a good check that balancing keeps working.
+	RedBlackTree rbt = RedBlackTree();
+	for (int i = 1; i <= 5000; i++) {
+		rbt.Insert(i);
+	}
+	assert(rbt.Size() == 5000);
+	assert(rbt.GetMin() == 1);
+	assert(rbt.GetMax() == 5000);
+	for (int i = 1; i <= 5000; i++) {
+		assert(rbt.Contains(i));
+	}
+	assert(rbt.Contains(0) == false);
+	assert(rbt.Contains(5001) == false);
+
+	RedBlackTree copy = RedBlackTree(rbt);
+	assert(copy.ToInfixString() == rbt.ToInfixString());
+
+	cout << "PASSED!" << endl << endl;
+}
+
+void TestPrivateMethods(){
+	RedBlackTree rbt = RedBlackTree();
+	rbt.PrivateTests();
+}
+
 void TestSize(){
 	cout << "Testing Size..." << endl;
 
@@ -325,6 +470,9 @@ int main(){
 	TestContains();
 	TestGetMinimumMaximum();
 	TestSize();
+	TestDuplicateInsert();
+	TestLargeTree();
+	TestPrivateMethods();
 
 	
 	cout << "ALL TESTS PASSED!!" << endl;

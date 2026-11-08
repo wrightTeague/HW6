@@ -36,6 +36,8 @@ class RedBlackTree {
     int GetMax();
     size_t Size();
 
+    void PrivateTests();
+
     private:
     unsigned long long int numItems = 0;
     RBTNode *root = nullptr;
@@ -52,5 +54,6 @@ class RedBlackTree {
     void RotateRight(RBTNode* node);
     RBTNode* CopySubtree(RBTNode* node, RBTNode* parent);
     void DeleteSubtree(RBTNode* node);
+    int BlackHeight(RBTNode* node) const;
 };
 #endif
